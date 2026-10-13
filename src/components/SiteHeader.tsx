@@ -11,6 +11,7 @@ export default function SiteHeader({ showBack, onBack }: Props) {
         background: "var(--forest)",
         boxShadow: "0 4px 0 rgba(0,0,0,0.15)",
       }}
+      title="Velwus-Verleden"
     >
 
       <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-20 flex items-center justify-between gap-4">
