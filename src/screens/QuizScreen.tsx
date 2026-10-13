@@ -12,7 +12,7 @@ type Props = {
 type State = "question" | "correct" | "wrong" | "done";
 
 const CORRECT_MSGS = ["🎉 Geweldig goed!", "⭐ Helemaal juist!", "🏆 Uitstekend!", "🎯 Raak!"];
-const WRONG_MSGS   = ["😅 Bijna! Probeer het volgende.", "💪 Niet erg, je leert ervan!", "🤔 Goed gedacht, maar..."];
+const WRONG_MSGS   = ["😅 Bijna! Probeer het volgende.", "💪 Niet erg, je leert ervan!", "🥺 Goed gedacht, maar..."];
 
 export default function QuizScreen({ schoolPlate, hotspot, onBack }: Props) {
   const [idx, setIdx] = useState(0);
