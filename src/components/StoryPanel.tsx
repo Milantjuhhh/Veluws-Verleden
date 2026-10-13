@@ -36,7 +36,7 @@ export default function StoryPanel({
     Math.max(minimumOffset, 50 - zoom * focusY),
   );
 
-  const videoEmbedUrl = getYouTubeEmbedUrl(content.videoUrl);
+  const videoEmbedUrl = getVideoEmbedUrl(content.videoUrl);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
@@ -214,6 +214,22 @@ export default function StoryPanel({
                   allowFullScreen
                 />
               </div>
+            ) : content.videoUrl ? (
+              <a
+                href={content.videoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex aspect-video w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-3xl px-6 text-center transition-transform hover:scale-[1.01]"
+                style={{
+                  background: "linear-gradient(145deg, var(--forest) 0%, #123d27 100%)",
+                  border: "4px solid rgba(255,255,255,0.15)",
+                  boxShadow: "0 6px 0 rgba(20,65,40,0.25)",
+                }}
+              >
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 text-2xl shadow-lg" aria-hidden="true">▶️</span>
+                <span className="text-lg font-black text-white md:text-2xl">{content.videoTitle ?? `Bekijk de video bij ${content.title}`}</span>
+                <span className="text-sm font-semibold text-white/80 md:text-base">Open de educatieve video in een nieuw venster</span>
+              </a>
             ) : (
               <div
                 className="flex aspect-video w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-3xl px-6 text-center"
@@ -312,7 +328,7 @@ export default function StoryPanel({
   );
 }
 
-function getYouTubeEmbedUrl(videoUrl?: string) {
+function getVideoEmbedUrl(videoUrl?: string) {
   if (!videoUrl) return null;
 
   const value = videoUrl.trim();
@@ -322,6 +338,11 @@ function getYouTubeEmbedUrl(videoUrl?: string) {
     try {
       const url = new URL(value);
       const hostname = url.hostname.replace(/^www\./, "");
+
+      if (hostname === "vimeo.com") {
+        const vimeoId = url.pathname.split("/").filter(Boolean)[0] ?? "";
+        return /^\d+$/.test(vimeoId) ? `https://player.vimeo.com/video/${vimeoId}` : null;
+      }
 
       if (hostname === "youtu.be") {
         videoId = url.pathname.split("/").filter(Boolean)[0] ?? "";

@@ -72,7 +72,21 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
       className="h-full overflow-hidden flex flex-col"
       style={{ background: isRomanPlate ? "#524848" : "var(--sand-light)" }}
     >
-      <SiteHeader showBack onBack={onBack} />
+      {!isRomanPlate && <SiteHeader showBack onBack={onBack} />}
+
+      {isRomanPlate && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="btn btn-secondary fixed right-3 top-3 z-40 flex items-center gap-2 px-4 py-3 text-sm sm:right-5 sm:top-5 sm:px-6 sm:text-base"
+          style={{ borderRadius: "var(--radius-full)", fontFamily: "Nunito, sans-serif" }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Terug naar overzicht
+        </button>
+      )}
 
       <main className={`flex min-h-0 w-full flex-1 items-center justify-center ${isRomanPlate ? "p-0" : "p-2"}`}>
         {/* ── Image + panel ───────────────────────── */}
@@ -82,10 +96,10 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
             className={`relative overflow-hidden ${isRomanPlate ? "rounded-none" : "rounded-[2rem]"}`}
             style={{
               width: isRomanPlate
-                ? "min(2048px, 100vw, calc(141.44dvh - 113px))"
+                ? "min(2048px, 100vw, 141.44dvh)"
                 : "min(1760px, calc(100vw - 16px), calc(200dvh - 192px))",
               aspectRatio: isRomanPlate ? "2048 / 1448" : "2 / 1",
-              maxHeight: isRomanPlate ? "calc(100dvh - 80px)" : undefined,
+              maxHeight: isRomanPlate ? "100dvh" : undefined,
               border: isRomanPlate ? "none" : "4px solid var(--forest)",
               boxShadow: isRomanPlate ? "none" : "0 8px 0 rgba(30,92,58,0.25), var(--shadow-pop)",
               background: isRomanPlate ? "#524848" : "var(--grey-light)",

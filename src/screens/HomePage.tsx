@@ -42,7 +42,7 @@ type CardProps = {
 };
 
 function PrintCard({ print, onOpen }: CardProps) {
-  const { id, title, desc, emoji, image, thumbnail } = print;
+  const { id, title, emoji, image, thumbnail } = print;
 
   return (
     <article
@@ -98,10 +98,6 @@ function PrintCard({ print, onOpen }: CardProps) {
         >
           {title}
         </h3>
-        <p className="mt-0.5 hidden flex-1 text-sm font-semibold leading-snug lg:block" style={{ color: "var(--charcoal-mid)" }}>
-          {desc}
-        </p>
-
         <button
           className="btn btn-primary mt-auto w-full py-2.5 text-sm md:text-base"
           onClick={(event) => {
