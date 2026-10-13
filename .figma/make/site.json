@@ -1,0 +1,10 @@
+{
+  "description": "Explore historical school posters with interactive stories and quizzes designed for secondary students to engage with Veluwe's rich past.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
