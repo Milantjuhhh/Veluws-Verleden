@@ -28,7 +28,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-[100dvh] w-full overflow-hidden" style={{ background: "var(--cream)" }}>
+    <div className="page-canvas h-[100dvh] w-full overflow-hidden">
       {screen === "home" && (
         <HomePage
           quizProgress={quizProgress}

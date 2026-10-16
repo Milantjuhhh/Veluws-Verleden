@@ -81,8 +81,14 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
   if (quizState === "done") {
     const perfect = score === questions.length;
     return (
-      <div className="h-full overflow-hidden flex flex-col" style={{ background: "var(--sand-light)" }}>
-        <SiteHeader showBack onBack={onBack} />
+      <div className="page-canvas flex h-full flex-col overflow-hidden">
+        <SiteHeader
+          showBack
+          onBack={onBack}
+          kicker={`Schoolplaat ${String(schoolPlate.id).padStart(2, "0")}`}
+          title={schoolPlate.title}
+          subtitle={`Informatiepunt ${hotspot}`}
+        />
         <div className="flex-1 min-h-0 flex items-center justify-center px-4 py-4">
           <div className="card w-full max-w-xl text-center overflow-hidden anim-bounce-in">
             {/* Header */}
@@ -95,7 +101,7 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
               </div>
               <h2
                 className="text-3xl md:text-4xl mb-2"
-                style={{ color: "var(--sand-light)", fontFamily: "Fredoka One, cursive" }}
+                style={{ color: "var(--sand-light)" }}
               >
                 {perfect ? "Perfect gedaan!" : "Quiz klaar!"}
               </h2>
@@ -116,7 +122,7 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
               >
                 <span
                   className="text-4xl md:text-5xl font-black"
-                  style={{ color: "var(--forest)", fontFamily: "Fredoka One, cursive" }}
+                  style={{ color: "var(--forest)" }}
                 >
                   {score}/{questions.length}
                 </span>
@@ -157,10 +163,16 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
 
   /* ── Quiz screen ─────────────────────────── */
   return (
-    <div className="min-h-full flex flex-col" style={{ background: "var(--sand-light)" }}>
-      <SiteHeader showBack onBack={onBack} />
+    <div className="page-canvas flex min-h-full flex-col">
+      <SiteHeader
+        showBack
+        onBack={onBack}
+        kicker={`Schoolplaat ${String(schoolPlate.id).padStart(2, "0")}`}
+        title={schoolPlate.title}
+        subtitle={`Informatiepunt ${hotspot}`}
+      />
 
-      <main className="flex-1 min-h-0 overflow-hidden flex flex-col items-center px-4 md:px-6 py-3 md:py-4 max-w-[960px] mx-auto w-full gap-2.5 md:gap-3">
+      <main className="mx-auto flex w-full max-w-[960px] flex-1 flex-col items-center gap-3 overflow-y-auto px-4 py-4 md:px-6 md:py-6">
 
         {/* Progress bar */}
         <div className="w-full flex flex-col gap-1.5 anim-slide-up flex-shrink-0">
@@ -226,14 +238,14 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
           style={{ border: "2px solid var(--grey-light)" }}
         >
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center font-black text-base mb-2"
-            style={{ background: "var(--forest)", color: "white", fontFamily: "Nunito" }}
+            className="mb-3 flex h-10 w-10 items-center justify-center rounded-full text-base font-bold"
+            style={{ background: "var(--sky)", color: "white" }}
           >
             ?
           </div>
           <h2
-            className="text-xl md:text-2xl font-black leading-snug"
-            style={{ color: "var(--charcoal)", fontFamily: "Nunito, sans-serif" }}
+            className="text-xl leading-snug md:text-2xl"
+            style={{ color: "var(--charcoal)" }}
           >
             {q.q}
           </h2>
@@ -267,11 +279,11 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
 
             if (revealed) {
               if (isCorrect) {
-                bg = "#D4EDDA"; border = "#28A745"; color = "#145A1F";
-                shadow = "0 4px 0 #1A7A32";
+                bg = "#E5F4EA"; border = "#1F7A45"; color = "#145A32";
+                shadow = "0 8px 16px rgba(31,122,69,0.16)";
               } else if (isPicked) {
-                bg = "#F8D7DA"; border = "#DC3545"; color = "#6B0B15";
-                shadow = "0 4px 0 #A82030";
+                bg = "#FDECEA"; border = "#B42318"; color = "#7A1C14";
+                shadow = "0 8px 16px rgba(180,35,24,0.14)";
               }
             } else if (isPicked) {
               bg = "var(--sky-light)"; border = "var(--sky)"; shadow = "0 4px 0 var(--sky-dark)";
@@ -296,7 +308,7 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
                 <span
                   className="w-10 h-10 rounded-full flex items-center justify-center font-black text-base flex-shrink-0"
                   style={{
-                    background: revealed && isCorrect ? "#28A745" : revealed && isPicked ? "#DC3545" : "var(--forest)",
+                    background: revealed && isCorrect ? "#1F7A45" : revealed && isPicked ? "#B42318" : "var(--forest)",
                     color: "white",
                   }}
                 >
@@ -319,7 +331,7 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
       {quizState !== "question" && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(15,58,33,0.72)", backdropFilter: "blur(7px)" }}
+          style={{ background: "rgba(23,63,56,0.62)", backdropFilter: "blur(8px)" }}
         >
           <div
             role="dialog"
@@ -328,7 +340,7 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAns
             className="anim-bounce-in w-full max-w-lg overflow-hidden rounded-[2rem] text-center"
             style={{
               background: "var(--sand-light)",
-              border: `5px solid ${quizState === "correct" ? "#28A745" : "var(--orange)"}`,
+              border: `1px solid ${quizState === "correct" ? "#1f7a45" : "var(--ochre)"}`,
               boxShadow: "0 24px 70px rgba(0,0,0,0.38)",
             }}
           >
