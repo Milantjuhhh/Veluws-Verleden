@@ -1,9 +1,13 @@
 import { SCHOOL_PLATES, type SchoolPlate } from "../data/schoolPlates";
+import { getAnsweredCount, type QuizProgress } from "../data/progress";
 
-type Props = { onSelectPrint: (schoolPlate: SchoolPlate) => void };
+type Props = {
+  onSelectPrint: (schoolPlate: SchoolPlate) => void;
+  quizProgress: QuizProgress;
+};
 
 
-export default function HomePage({ onSelectPrint }: Props) {
+export default function HomePage({ onSelectPrint, quizProgress }: Props) {
   return (
     <div className="flex h-full flex-col overflow-y-auto md:overflow-hidden" style={{ background: "linear-gradient(180deg, #fffdf8 0%, var(--sand-light) 100%)" }}>
 
@@ -26,6 +30,7 @@ export default function HomePage({ onSelectPrint }: Props) {
             <PrintCard
               key={p.id}
               print={p}
+              answered={getAnsweredCount(quizProgress, p.id)}
               onOpen={() => onSelectPrint(p)}
             />
           ))}
@@ -38,11 +43,14 @@ export default function HomePage({ onSelectPrint }: Props) {
 
 type CardProps = {
   print: SchoolPlate;
+  answered: number;
   onOpen: () => void;
 };
 
-function PrintCard({ print, onOpen }: CardProps) {
+function PrintCard({ print, answered, onOpen }: CardProps) {
   const { id, title, emoji, image, thumbnail } = print;
+  const total = 10;
+  const progressPercentage = Math.min(100, Math.round((answered / total) * 100));
 
   return (
     <article
@@ -98,6 +106,25 @@ function PrintCard({ print, onOpen }: CardProps) {
         >
           {title}
         </h3>
+        <div className="mt-1 flex flex-col gap-1" aria-label={`${answered} van ${total} vragen ingevuld`}>
+          <div className="flex items-center justify-between text-xs font-black md:text-sm">
+            <span style={{ color: "var(--charcoal-mid)" }}>Quizvoortgang</span>
+            <span style={{ color: answered === total ? "var(--forest)" : "var(--sky-dark)" }}>
+              {answered}/{total}
+            </span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--grey-light)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${progressPercentage}%`,
+                background: answered === total
+                  ? "var(--forest-light)"
+                  : "linear-gradient(90deg, var(--sky), var(--forest-light))",
+              }}
+            />
+          </div>
+        </div>
         <button
           className="btn btn-primary mt-auto w-full py-2.5 text-sm md:text-base"
           onClick={(event) => {

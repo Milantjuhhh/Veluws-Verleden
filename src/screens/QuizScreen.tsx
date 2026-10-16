@@ -7,6 +7,11 @@ type Props = {
   schoolPlate: SchoolPlate;
   hotspot: number;
   onBack: () => void;
+  onQuestionAnswered: (
+    schoolPlateId: number,
+    hotspot: number,
+    questionIndex: number,
+  ) => void;
 };
 
 type State = "question" | "correct" | "wrong" | "done";
@@ -14,7 +19,7 @@ type State = "question" | "correct" | "wrong" | "done";
 const CORRECT_MSGS = ["🎉 Geweldig goed!", "⭐ Helemaal juist!", "🏆 Uitstekend!", "🎯 Raak!"];
 const WRONG_MSGS   = ["😅 Bijna! Probeer het volgende.", "💪 Niet erg, je leert ervan!", "🤔 Goed gedacht, maar..."];
 
-export default function QuizScreen({ schoolPlate, hotspot, onBack }: Props) {
+export default function QuizScreen({ schoolPlate, hotspot, onBack, onQuestionAnswered }: Props) {
   const [idx, setIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [quizState, setQuizState] = useState<State>("question");
@@ -50,6 +55,7 @@ export default function QuizScreen({ schoolPlate, hotspot, onBack }: Props) {
 
   const choose = (i: number) => {
     if (quizState !== "question") return;
+    onQuestionAnswered(schoolPlate.id, hotspot, idx);
     setSelected(i);
     if (i === q.correct) {
       playFeedbackSound(correctAudioRef.current, soundEnabled);

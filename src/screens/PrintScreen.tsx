@@ -1,7 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import SiteHeader from "../components/SiteHeader";
 import StoryPanel from "../components/StoryPanel";
 import type { SchoolPlate } from "../data/schoolPlates";
+import {
+  getAnsweredCount,
+  isQuestionAnswered,
+  type QuizProgress,
+} from "../data/progress";
 
 type Props = {
   schoolPlate: SchoolPlate;
@@ -11,6 +16,7 @@ type Props = {
   activeHotspot: number;
   onClosePanel: () => void;
   onStartQuiz: () => void;
+  quizProgress: QuizProgress;
 };
 
 type Hotspot = { n: number; x: number; y: number };
@@ -43,11 +49,17 @@ const ROMAN_HOTSPOTS: Hotspot[] = [
   { n: 10, x: 68, y: 20 }, // Landschap en dieren
 ];
 
-export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen, activeHotspot, onClosePanel, onStartQuiz }: Props) {
+export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen, activeHotspot, onClosePanel, onStartQuiz, quizProgress }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [mapZoom, setMapZoom] = useState(1);
   const isRomanPlate = schoolPlate.id === 3;
   const hotspots = isRomanPlate ? ROMAN_HOTSPOTS : DEFAULT_HOTSPOTS;
   const activePoint = hotspots.find(({ n }) => n === activeHotspot) ?? hotspots[0];
+  const answeredCount = getAnsweredCount(quizProgress, schoolPlate.id);
+
+  useEffect(() => {
+    setMapZoom(1);
+  }, [schoolPlate.id]);
 
   useEffect(() => {
     if (!panelOpen) return;
@@ -105,27 +117,69 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
               background: isRomanPlate ? "#524848" : "var(--grey-light)",
             }}
           >
-            <img
-              src={schoolPlate.image}
-              alt={`${schoolPlate.title} — historische schoolplaat`}
-              className={`block h-full w-full object-center ${isRomanPlate ? "object-contain" : "object-cover"}`}
-            />
-            {/* Vintage tint */}
-            {!isRomanPlate && (
-              <div className="absolute inset-0 pointer-events-none" style={{ background: "rgba(185,140,60,0.08)", mixBlendMode: "multiply" }} />
-            )}
-
-            {hotspots.map(({ n, x, y }) => (
-              <HotspotBtn
-                key={n}
-                n={n}
-                x={x}
-                y={y}
-                selected={panelOpen && activeHotspot === n}
-                compact={isRomanPlate}
-                onClick={() => onHotspot(n)}
+            <div
+              className="absolute inset-0 transition-transform duration-300 ease-out"
+              style={{ transform: `scale(${mapZoom})`, transformOrigin: "center" }}
+            >
+              <img
+                src={schoolPlate.image}
+                alt={`${schoolPlate.title} — historische schoolplaat`}
+                className={`block h-full w-full object-center ${isRomanPlate ? "object-contain" : "object-cover"}`}
               />
-            ))}
+              {/* Vintage tint */}
+              {!isRomanPlate && (
+                <div className="absolute inset-0 pointer-events-none" style={{ background: "rgba(185,140,60,0.08)", mixBlendMode: "multiply" }} />
+              )}
+
+              {hotspots.map(({ n, x, y }) => (
+                <HotspotBtn
+                  key={n}
+                  n={n}
+                  x={x}
+                  y={y}
+                  selected={panelOpen && activeHotspot === n}
+                  compact={isRomanPlate}
+                  inverseZoom={1 / mapZoom}
+                  onClick={() => onHotspot(n)}
+                />
+              ))}
+            </div>
+
+            <div
+              className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full p-2"
+              style={{ background: "rgba(255,255,255,0.94)", boxShadow: "0 5px 18px rgba(0,0,0,0.22)" }}
+              aria-label="Zoomknoppen voor de schoolplaat"
+            >
+              <button
+                type="button"
+                onClick={() => setMapZoom((zoom) => Math.max(1, Number((zoom - 0.25).toFixed(2))))}
+                disabled={mapZoom <= 1}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-2xl font-black disabled:cursor-not-allowed disabled:opacity-35"
+                style={{ background: "var(--grey-light)", color: "var(--forest)" }}
+                aria-label="Uitzoomen"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                onClick={() => setMapZoom(1)}
+                className="min-w-16 rounded-full px-3 py-2 text-sm font-black"
+                style={{ color: "var(--forest)" }}
+                aria-label="Zoom herstellen"
+              >
+                {Math.round(mapZoom * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={() => setMapZoom((zoom) => Math.min(2.5, Number((zoom + 0.25).toFixed(2))))}
+                disabled={mapZoom >= 2.5}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-2xl font-black disabled:cursor-not-allowed disabled:opacity-35"
+                style={{ background: "var(--forest)", color: "white" }}
+                aria-label="Inzoomen"
+              >
+                +
+              </button>
+            </div>
 
             {/* Corner label */}
           </div>
@@ -153,6 +207,12 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
               schoolPlate={schoolPlate}
               hotspot={activeHotspot}
               total={10}
+              answeredCount={answeredCount}
+              currentQuestionAnswered={isQuestionAnswered(
+                quizProgress,
+                schoolPlate.id,
+                activeHotspot,
+              )}
               focusX={activePoint.x}
               focusY={activePoint.y}
               onClose={onClosePanel}
@@ -165,32 +225,54 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
   );
 }
 
-function HotspotBtn({ n, x, y, selected, compact, onClick }: { n: number; x: number; y: number; selected: boolean; compact: boolean; onClick: () => void }) {
+function HotspotBtn({
+  n,
+  x,
+  y,
+  selected,
+  compact,
+  inverseZoom,
+  onClick,
+}: {
+  n: number;
+  x: number;
+  y: number;
+  selected: boolean;
+  compact: boolean;
+  inverseZoom: number;
+  onClick: () => void;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className={["absolute flex items-center justify-center font-black text-base focus:outline-none transition-all duration-200", !selected ? "hotspot-pulse hover:scale-110 active:scale-95" : ""].join(" ")}
+    <div
+      className="absolute z-10 transition-transform duration-300 ease-out"
       style={{
         left: `${x}%`,
         top: `${y}%`,
-        transform: `translate(-50%, -50%) ${selected ? "scale(1.22)" : ""}`,
-        width: compact ? "clamp(36px, 3.4vw, 50px)" : "clamp(52px, 5vw, 68px)",
-        height: compact ? "clamp(36px, 3.4vw, 50px)" : "clamp(52px, 5vw, 68px)",
-        borderRadius: "50%",
-        background: selected ? "var(--orange)" : "var(--sky)",
-        color: "white",
-        border: `4px solid white`,
-        boxShadow: selected
-          ? "0 4px 0 var(--orange-dark), 0 8px 20px rgba(232,112,42,0.55)"
-          : "0 3px 0 var(--sky-dark), 0 6px 16px rgba(0,0,0,0.30)",
-        zIndex: 10,
-        fontFamily: "Nunito, sans-serif",
-        fontSize: compact ? "clamp(14px, 1.3vw, 19px)" : "clamp(17px, 1.8vw, 23px)",
+        transform: `translate(-50%, -50%) scale(${inverseZoom})`,
       }}
-      aria-label={`Informatiepunt ${n}`}
-      aria-pressed={selected}
     >
-      {n}
-    </button>
+      <button
+        onClick={onClick}
+        className={["flex items-center justify-center font-black text-base focus:outline-none transition-all duration-200", !selected ? "hotspot-pulse hover:scale-110 active:scale-95" : ""].join(" ")}
+        style={{
+          transform: selected ? "scale(1.15)" : undefined,
+          width: compact ? "clamp(36px, 3.4vw, 50px)" : "clamp(52px, 5vw, 68px)",
+          height: compact ? "clamp(36px, 3.4vw, 50px)" : "clamp(52px, 5vw, 68px)",
+          borderRadius: "50%",
+          background: selected ? "var(--orange)" : "var(--sky)",
+          color: "white",
+          border: `4px solid white`,
+          boxShadow: selected
+            ? "0 4px 0 var(--orange-dark), 0 8px 20px rgba(232,112,42,0.55)"
+            : "0 3px 0 var(--sky-dark), 0 6px 16px rgba(0,0,0,0.30)",
+          fontFamily: "Nunito, sans-serif",
+          fontSize: compact ? "clamp(14px, 1.3vw, 19px)" : "clamp(17px, 1.8vw, 23px)",
+        }}
+        aria-label={`Informatiepunt ${n}`}
+        aria-pressed={selected}
+      >
+        {n}
+      </button>
+    </div>
   );
 }

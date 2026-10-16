@@ -6,6 +6,8 @@ type Props = {
   schoolPlate: SchoolPlate;
   hotspot: number;
   total: number;
+  answeredCount: number;
+  currentQuestionAnswered: boolean;
   focusX: number;
   focusY: number;
   onClose: () => void;
@@ -16,6 +18,8 @@ export default function StoryPanel({
   schoolPlate,
   hotspot,
   total,
+  answeredCount,
+  currentQuestionAnswered,
   focusX,
   focusY,
   onClose,
@@ -23,7 +27,7 @@ export default function StoryPanel({
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const content = getHotspotContent(schoolPlate.id, hotspot);
-  const pct = Math.round((hotspot / total) * 100);
+  const pct = Math.min(100, Math.round((answeredCount / total) * 100));
 
   const zoom = 2.25;
   const minimumOffset = 100 - zoom * 100;
@@ -265,7 +269,7 @@ export default function StoryPanel({
               onClick={onStartQuiz}
               className="btn btn-primary w-full py-3.5 text-base md:text-lg"
             >
-              🎯 Start de quiz
+              {currentQuestionAnswered ? "🔁 Doe de quiz opnieuw" : "🎯 Start de quiz"}
             </button>
 
             <button
@@ -296,7 +300,7 @@ export default function StoryPanel({
                   boxShadow: "0 2px 0 var(--orange-dark)",
                 }}
               >
-                {hotspot} van {total}
+                {answeredCount} van {total}
               </span>
             </div>
 
@@ -316,10 +320,10 @@ export default function StoryPanel({
               style={{ color: "var(--muted)" }}
             >
               {pct === 100
-                ? "🏆 Alle punten ontdekt!"
-                : `Nog ${total - hotspot} punt${
-                    total - hotspot === 1 ? "" : "en"
-                  } te ontdekken`}
+                ? "🏆 Alle vragen ingevuld!"
+                : `Nog ${total - answeredCount} vraag${
+                    total - answeredCount === 1 ? "" : "en"
+                  } in te vullen`}
             </p>
           </div>
         </div>
