@@ -16,7 +16,7 @@ const SCHOOL_PLATE_3_QUESTIONS: Record<number, Question> = {
       "Om veilig te slapen",
       "Om een markt te maken",
       "Om groenten te planten",
-      "Om een kasteel te bouwen",
+      "Om een kasteel te bouwenja",
     ],
     correct: 0,
     hint: "Denk aan een veilige plek om te slapen.",
