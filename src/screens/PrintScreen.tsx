@@ -1,4 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import SiteHeader from "../components/SiteHeader";
 import StoryPanel from "../components/StoryPanel";
 import type { SchoolPlate } from "../data/schoolPlates";
@@ -51,7 +56,17 @@ const ROMAN_HOTSPOTS: Hotspot[] = [
 
 export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen, activeHotspot, onClosePanel, onStartQuiz, quizProgress }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const mapViewportRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{
+    pointerId: number;
+    pointerX: number;
+    pointerY: number;
+    offsetX: number;
+    offsetY: number;
+  } | null>(null);
   const [mapZoom, setMapZoom] = useState(1);
+  const [mapOffset, setMapOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
   const isRomanPlate = schoolPlate.id === 3;
   const hotspots = isRomanPlate ? ROMAN_HOTSPOTS : DEFAULT_HOTSPOTS;
   const activePoint = hotspots.find(({ n }) => n === activeHotspot) ?? hotspots[0];
@@ -59,7 +74,54 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
 
   useEffect(() => {
     setMapZoom(1);
+    setMapOffset({ x: 0, y: 0 });
   }, [schoolPlate.id]);
+
+  useEffect(() => {
+    setMapOffset((current) => clampMapOffset(
+      current.x,
+      current.y,
+      mapZoom,
+      mapViewportRef.current,
+    ));
+  }, [mapZoom]);
+
+  const startDragging = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (mapZoom <= 1 || (event.target as HTMLElement).closest("button")) return;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragStartRef.current = {
+      pointerId: event.pointerId,
+      pointerX: event.clientX,
+      pointerY: event.clientY,
+      offsetX: mapOffset.x,
+      offsetY: mapOffset.y,
+    };
+    setIsDragging(true);
+    event.preventDefault();
+  };
+
+  const dragMap = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const start = dragStartRef.current;
+    if (!start || start.pointerId !== event.pointerId) return;
+
+    setMapOffset(clampMapOffset(
+      start.offsetX + event.clientX - start.pointerX,
+      start.offsetY + event.clientY - start.pointerY,
+      mapZoom,
+      mapViewportRef.current,
+    ));
+  };
+
+  const stopDragging = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (dragStartRef.current?.pointerId !== event.pointerId) return;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    dragStartRef.current = null;
+    setIsDragging(false);
+  };
 
   useEffect(() => {
     if (!panelOpen) return;
@@ -105,7 +167,12 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
         <div className="flex min-h-0 w-full flex-1 items-center justify-center">
           {/* Schoolplaat */}
           <div
+            ref={mapViewportRef}
             className={`relative overflow-hidden ${isRomanPlate ? "rounded-none" : "rounded-[2rem]"}`}
+            onPointerDown={startDragging}
+            onPointerMove={dragMap}
+            onPointerUp={stopDragging}
+            onPointerCancel={stopDragging}
             style={{
               width: isRomanPlate
                 ? "min(2048px, 100vw, 141.44dvh)"
@@ -115,16 +182,24 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
               border: isRomanPlate ? "none" : "4px solid var(--forest)",
               boxShadow: isRomanPlate ? "none" : "0 8px 0 rgba(30,92,58,0.25), var(--shadow-pop)",
               background: isRomanPlate ? "#524848" : "var(--grey-light)",
+              cursor: mapZoom > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+              touchAction: mapZoom > 1 ? "none" : "auto",
             }}
           >
             <div
               className="absolute inset-0 transition-transform duration-300 ease-out"
-              style={{ transform: `scale(${mapZoom})`, transformOrigin: "center" }}
+              style={{
+                transform: `translate3d(${mapOffset.x}px, ${mapOffset.y}px, 0) scale(${mapZoom})`,
+                transformOrigin: "center",
+                transitionDuration: isDragging ? "0ms" : undefined,
+              }}
             >
               <img
                 src={schoolPlate.image}
                 alt={`${schoolPlate.title} — historische schoolplaat`}
                 className={`block h-full w-full object-center ${isRomanPlate ? "object-contain" : "object-cover"}`}
+                draggable={false}
+                style={{ pointerEvents: "none", userSelect: "none" }}
               />
               {/* Vintage tint */}
               {!isRomanPlate && (
@@ -162,7 +237,10 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
               </button>
               <button
                 type="button"
-                onClick={() => setMapZoom(1)}
+                onClick={() => {
+                  setMapZoom(1);
+                  setMapOffset({ x: 0, y: 0 });
+                }}
                 className="min-w-16 rounded-full px-3 py-2 text-sm font-black"
                 style={{ color: "var(--forest)" }}
                 aria-label="Zoom herstellen"
@@ -180,6 +258,15 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
                 +
               </button>
             </div>
+
+            {mapZoom > 1 && (
+              <div
+                className="pointer-events-none absolute left-3 top-3 z-30 rounded-full px-4 py-2 text-sm font-black text-white"
+                style={{ background: "rgba(30,92,58,0.9)", boxShadow: "0 3px 12px rgba(0,0,0,0.22)" }}
+              >
+                ✋ Sleep om rond te kijken
+              </div>
+            )}
 
             {/* Corner label */}
           </div>
@@ -223,6 +310,23 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
       )}
     </div>
   );
+}
+
+function clampMapOffset(
+  x: number,
+  y: number,
+  zoom: number,
+  viewport: HTMLDivElement | null,
+) {
+  if (!viewport || zoom <= 1) return { x: 0, y: 0 };
+
+  const maxX = (viewport.clientWidth * (zoom - 1)) / 2;
+  const maxY = (viewport.clientHeight * (zoom - 1)) / 2;
+
+  return {
+    x: Math.min(maxX, Math.max(-maxX, x)),
+    y: Math.min(maxY, Math.max(-maxY, y)),
+  };
 }
 
 function HotspotBtn({
