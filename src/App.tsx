@@ -28,10 +28,15 @@ export default function App() {
   };
 
   return (
-    <div className="page-canvas h-[100dvh] w-full overflow-hidden">
+    <div className="h-[100dvh] w-full overflow-hidden" style={{ background: "var(--cream)" }}>
       {screen === "home" && (
         <HomePage
           quizProgress={quizProgress}
+          onResetQuestions={() => {
+            if (window.confirm("Weet je zeker dat je alle vragen wilt resetten?")) {
+              setQuizProgress({});
+            }
+          }}
           onSelectPrint={(schoolPlate) => {
             setActiveSchoolPlate(schoolPlate);
             setPanelOpen(false);

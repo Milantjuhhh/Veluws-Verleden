@@ -52,7 +52,7 @@ export default function StoryPanel({
       style={{
         background: "var(--sand-light)",
         boxShadow: "var(--shadow-pop)",
-        border: "1px solid rgba(23,63,56,0.12)",
+        border: "4px solid var(--forest)",
       }}
     >
       {/* Bovenkant */}
@@ -60,7 +60,7 @@ export default function StoryPanel({
         className="flex flex-shrink-0 items-start justify-between gap-3 px-4 py-3 md:px-7 md:py-4"
         style={{
           background: "var(--forest)",
-          borderBottom: "3px solid var(--ochre)",
+          borderBottom: "4px solid var(--orange)",
         }}
       >
         <div className="flex min-w-0 items-center gap-4">
@@ -82,7 +82,10 @@ export default function StoryPanel({
             <h2
               id="story-dialog-title"
               className="text-xl leading-snug md:text-2xl"
-              style={{ color: "var(--sand-light)" }}
+              style={{
+                color: "var(--sand-light)",
+                fontFamily: "Fredoka One, cursive",
+              }}
             >
               {content.title}
             </h2>
@@ -144,8 +147,8 @@ export default function StoryPanel({
 
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/25" />
 
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[rgba(23,63,56,0.88)] px-4 py-2 text-sm font-semibold text-white">
-            Ingezoomde plek
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[rgba(30,92,58,0.9)] px-4 py-2 text-sm font-black text-white md:text-base">
+            🔎 Ingezoomde plek
           </div>
         </div>
 
@@ -163,6 +166,7 @@ export default function StoryPanel({
               className="text-2xl md:text-3xl"
               style={{
                 color: "var(--forest)",
+                fontFamily: "Fredoka One, cursive",
               }}
             >
               {content.title}
@@ -173,7 +177,7 @@ export default function StoryPanel({
             {content.paragraphs.map((paragraph, index) => (
               <p
                 key={index}
-                className="text-base leading-relaxed md:text-lg"
+                className="text-base font-semibold leading-relaxed md:text-lg"
                 style={{ color: "var(--charcoal)" }}
               >
                 {paragraph}
@@ -190,6 +194,7 @@ export default function StoryPanel({
               className="mb-3 text-xl md:text-2xl"
               style={{
                 color: "var(--forest)",
+                fontFamily: "Fredoka One, cursive",
               }}
             >
               Bekijk de video
@@ -199,8 +204,8 @@ export default function StoryPanel({
               <div
                 className="overflow-hidden rounded-3xl"
                 style={{
-                  border: "1px solid rgba(23,63,56,0.16)",
-                  boxShadow: "var(--shadow-soft)",
+                  border: "4px solid var(--forest)",
+                  boxShadow: "0 6px 0 rgba(20,65,40,0.25)",
                 }}
               >
                 <iframe

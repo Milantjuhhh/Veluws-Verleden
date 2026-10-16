@@ -142,31 +142,45 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
   }, [panelOpen, onClosePanel]);
 
   return (
-    <div className="page-canvas flex h-full flex-col overflow-hidden">
-      <SiteHeader
-        showBack
-        onBack={onBack}
-        kicker={`Schoolplaat ${String(schoolPlate.id).padStart(2, "0")}`}
-        title={schoolPlate.title}
-        subtitle="Tik op een informatiepunt en ontdek het verhaal."
-      />
+    <div
+      className="h-full overflow-hidden flex flex-col"
+      style={{ background: isRomanPlate ? "#524848" : "var(--sand-light)" }}
+    >
+      {!isRomanPlate && <SiteHeader showBack onBack={onBack} />}
 
-      <main
-        className="flex min-h-0 w-full flex-1 items-center justify-center p-3 md:p-5"
-        style={{ containerType: "size" }}
-      >
-        <div className="flex h-full min-h-0 w-full flex-1 items-center justify-center">
+      {isRomanPlate && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="btn btn-secondary fixed right-3 top-3 z-40 flex items-center gap-2 px-4 py-3 text-sm sm:right-5 sm:top-5 sm:px-6 sm:text-base"
+          style={{ borderRadius: "var(--radius-full)", fontFamily: "Nunito, sans-serif" }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Terug naar overzicht
+        </button>
+      )}
+
+      <main className={`flex min-h-0 w-full flex-1 items-center justify-center ${isRomanPlate ? "p-0" : "p-2"}`}>
+        {/* ── Image + panel ───────────────────────── */}
+        <div className="flex min-h-0 w-full flex-1 items-center justify-center">
+          {/* Schoolplaat */}
           <div
             ref={mapViewportRef}
-            className="relative overflow-hidden rounded-2xl"
+            className={`relative overflow-hidden ${isRomanPlate ? "rounded-none" : "rounded-[2rem]"}`}
             onPointerDown={startDragging}
             onPointerMove={dragMap}
             onPointerUp={stopDragging}
             onPointerCancel={stopDragging}
             style={{
-              width: `min(100cqw, calc(100cqh * ${isRomanPlate ? 2048 / 1448 : 2}))`,
+              width: isRomanPlate
+                ? "min(2048px, 100vw, 141.44dvh)"
+                : "min(1760px, calc(100vw - 16px), calc(200dvh - 192px))",
               aspectRatio: isRomanPlate ? "2048 / 1448" : "2 / 1",
-              boxShadow: "0 18px 40px rgba(23,63,56,0.18)",
+              maxHeight: isRomanPlate ? "100dvh" : undefined,
+              border: isRomanPlate ? "none" : "4px solid var(--forest)",
+              boxShadow: isRomanPlate ? "none" : "0 8px 0 rgba(30,92,58,0.25), var(--shadow-pop)",
               background: isRomanPlate ? "#524848" : "var(--grey-light)",
               cursor: mapZoom > 1 ? (isDragging ? "grabbing" : "grab") : "default",
               touchAction: mapZoom > 1 ? "none" : "auto",
@@ -207,15 +221,15 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
             </div>
 
             <div
-              className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-1 rounded-full p-1.5"
-              style={{ background: "rgba(255,253,248,0.94)", boxShadow: "0 10px 28px rgba(23,63,56,0.18)", border: "1px solid rgba(23,63,56,0.08)" }}
+              className="absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full p-2"
+              style={{ background: "rgba(255,255,255,0.94)", boxShadow: "0 5px 18px rgba(0,0,0,0.22)" }}
               aria-label="Zoomknoppen voor de schoolplaat"
             >
               <button
                 type="button"
                 onClick={() => setMapZoom((zoom) => Math.max(1, Number((zoom - 0.25).toFixed(2))))}
                 disabled={mapZoom <= 1}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-semibold disabled:cursor-not-allowed disabled:opacity-35"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-2xl font-black disabled:cursor-not-allowed disabled:opacity-35"
                 style={{ background: "var(--grey-light)", color: "var(--forest)" }}
                 aria-label="Uitzoomen"
               >
@@ -227,7 +241,7 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
                   setMapZoom(1);
                   setMapOffset({ x: 0, y: 0 });
                 }}
-                className="min-w-16 rounded-full px-3 py-2 text-sm font-bold"
+                className="min-w-16 rounded-full px-3 py-2 text-sm font-black"
                 style={{ color: "var(--forest)" }}
                 aria-label="Zoom herstellen"
               >
@@ -237,8 +251,8 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
                 type="button"
                 onClick={() => setMapZoom((zoom) => Math.min(2.5, Number((zoom + 0.25).toFixed(2))))}
                 disabled={mapZoom >= 2.5}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-2xl font-semibold disabled:cursor-not-allowed disabled:opacity-35"
-                style={{ background: "var(--sky)", color: "white" }}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-2xl font-black disabled:cursor-not-allowed disabled:opacity-35"
+                style={{ background: "var(--forest)", color: "white" }}
                 aria-label="Inzoomen"
               >
                 +
@@ -247,10 +261,10 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
 
             {mapZoom > 1 && (
               <div
-                className="pointer-events-none absolute left-3 top-3 z-30 rounded-full px-4 py-2 text-sm font-semibold text-white"
-                style={{ background: "rgba(23,63,56,0.88)" }}
+                className="pointer-events-none absolute left-3 top-3 z-30 rounded-full px-4 py-2 text-sm font-black text-white"
+                style={{ background: "rgba(30,92,58,0.9)", boxShadow: "0 3px 12px rgba(0,0,0,0.22)" }}
               >
-                Sleep om rond te kijken
+                ✋ Sleep om rond te kijken
               </div>
             )}
 
@@ -264,7 +278,7 @@ export default function PrintScreen({ schoolPlate, onBack, onHotspot, panelOpen,
       {panelOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
-          style={{ background: "rgba(23,63,56,0.62)", backdropFilter: "blur(8px)" }}
+          style={{ background: "rgba(15,58,33,0.72)", backdropFilter: "blur(7px)" }}
           onMouseDown={onClosePanel}
         >
           <div
@@ -343,19 +357,20 @@ function HotspotBtn({
     >
       <button
         onClick={onClick}
-        className={["flex items-center justify-center font-bold focus:outline-none transition-all duration-200", !selected ? "hotspot-pulse hover:scale-110 active:scale-95" : ""].join(" ")}
+        className={["flex items-center justify-center font-black text-base focus:outline-none transition-all duration-200", !selected ? "hotspot-pulse hover:scale-110 active:scale-95" : ""].join(" ")}
         style={{
-          transform: selected ? "scale(1.12)" : undefined,
-          width: compact ? "clamp(44px, 3.6vw, 52px)" : "clamp(48px, 4.4vw, 60px)",
-          height: compact ? "clamp(44px, 3.6vw, 52px)" : "clamp(48px, 4.4vw, 60px)",
+          transform: selected ? "scale(1.15)" : undefined,
+          width: compact ? "clamp(36px, 3.4vw, 50px)" : "clamp(52px, 5vw, 68px)",
+          height: compact ? "clamp(36px, 3.4vw, 50px)" : "clamp(52px, 5vw, 68px)",
           borderRadius: "50%",
-          background: selected ? "var(--ochre)" : "var(--sky)",
+          background: selected ? "var(--orange)" : "var(--sky)",
           color: "white",
-          border: "3px solid white",
+          border: `4px solid white`,
           boxShadow: selected
-            ? "0 0 0 4px rgba(210,138,40,0.35), 0 8px 16px rgba(0,0,0,0.25)"
-            : "0 6px 14px rgba(0,0,0,0.28)",
-          fontSize: compact ? "15px" : "18px",
+            ? "0 4px 0 var(--orange-dark), 0 8px 20px rgba(232,112,42,0.55)"
+            : "0 3px 0 var(--sky-dark), 0 6px 16px rgba(0,0,0,0.30)",
+          fontFamily: "Nunito, sans-serif",
+          fontSize: compact ? "clamp(14px, 1.3vw, 19px)" : "clamp(17px, 1.8vw, 23px)",
         }}
         aria-label={`Informatiepunt ${n}`}
         aria-pressed={selected}

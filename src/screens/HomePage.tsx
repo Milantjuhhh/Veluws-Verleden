@@ -1,53 +1,49 @@
-import SiteHeader from "../components/SiteHeader";
 import { SCHOOL_PLATES, type SchoolPlate } from "../data/schoolPlates";
 import { getAnsweredCount, type QuizProgress } from "../data/progress";
 
 type Props = {
   onSelectPrint: (schoolPlate: SchoolPlate) => void;
   quizProgress: QuizProgress;
+  onResetQuestions: () => void;
 };
 
-export default function HomePage({ onSelectPrint, quizProgress }: Props) {
+
+export default function HomePage({ onSelectPrint, quizProgress, onResetQuestions }: Props) {
   return (
-    <div className="page-canvas flex h-full flex-col overflow-y-auto">
-      <SiteHeader />
+    <div className="flex h-full flex-col overflow-y-auto md:overflow-hidden" style={{ background: "linear-gradient(180deg, #fffdf8 0%, var(--sand-light) 100%)" }}>
 
-      <main className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-4 py-8 md:px-8 md:py-10">
-        <section className="mb-8 grid items-center gap-6 overflow-hidden rounded-[22px] bg-white/80 px-6 py-7 shadow-[0_14px_36px_rgba(23,63,56,0.08)] ring-1 ring-[#e5e9e7] md:grid-cols-[1.4fr_0.8fr] md:px-10 md:py-9">
-          <div>
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: "var(--sky-dark)" }}>
-              Historische schoolplaten
-            </p>
-            <h1 className="mb-3 text-4xl leading-[1.15] md:text-5xl" style={{ color: "var(--forest)" }}>
-              Ontdek het Veluws Verleden
-            </h1>
-            <p className="max-w-xl text-base leading-relaxed md:text-lg" style={{ color: "var(--charcoal-mid)" }}>
-              Bekijk historische schoolplaten en ontdek de verhalen achter bijzondere gebeurtenissen, voorwerpen en personen.
-            </p>
-          </div>
-          <LandscapeMark />
-        </section>
-
-        <div className="mb-4 flex items-end justify-between gap-3">
-          <h2 className="text-2xl md:text-3xl" style={{ color: "var(--forest)" }}>
-            Kies een schoolplaat
+      {/* ── Grid section ────────────────────────────────── */}
+      <main className="mx-auto flex min-h-0 w-full max-w-[1580px] flex-1 flex-col px-3 py-3 md:px-5 md:py-4">
+        <div className="mb-3 flex-shrink-0 text-center">
+          <h2
+            className="mb-1 text-3xl md:text-4xl"
+            style={{ color: "var(--forest)", fontFamily: "Fredoka One, cursive" }}
+          >
+            🗓️ Kies een schoolplaat
           </h2>
-          <p className="text-sm font-semibold" style={{ color: "var(--muted)" }}>
-            {SCHOOL_PLATES.length} platen
+          <p className="text-base md:text-lg font-semibold" style={{ color: "var(--charcoal-mid)" }}>
+            Veluws Verleden, klik op een schoolplaat om te bekijken en te ontdekken.
           </p>
+          <button
+            type="button"
+            className="btn btn-secondary mt-2 px-5 py-2 text-sm"
+            onClick={onResetQuestions}
+          >
+            Reset vragen
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {SCHOOL_PLATES.map((plate) => (
+        <div className="grid min-h-0 flex-1 grid-cols-2 gap-3 md:grid-cols-4 md:grid-rows-2 md:gap-4">
+          {SCHOOL_PLATES.map((p) => (
             <PrintCard
-              key={plate.id}
-              print={plate}
-              answered={getAnsweredCount(quizProgress, plate.id)}
-              featured={plate.id === 3}
-              onOpen={() => onSelectPrint(plate)}
+              key={p.id}
+              print={p}
+              answered={getAnsweredCount(quizProgress, p.id)}
+              onOpen={() => onSelectPrint(p)}
             />
           ))}
         </div>
+
       </main>
     </div>
   );
@@ -56,106 +52,97 @@ export default function HomePage({ onSelectPrint, quizProgress }: Props) {
 type CardProps = {
   print: SchoolPlate;
   answered: number;
-  featured: boolean;
   onOpen: () => void;
 };
 
-function PrintCard({ print, answered, featured, onOpen }: CardProps) {
-  const { id, title, desc, image, thumbnail } = print;
+function PrintCard({ print, answered, onOpen }: CardProps) {
+  const { id, title, emoji, image, thumbnail } = print;
   const total = 10;
   const progressPercentage = Math.min(100, Math.round((answered / total) * 100));
-  const status = answered === total ? "Afgerond" : answered > 0 ? "Bezig" : featured ? "Beschikbaar" : "Te ontdekken";
 
   return (
     <article
       onClick={onOpen}
-      className="group flex cursor-pointer flex-col overflow-hidden rounded-[22px] bg-white text-left shadow-[0_12px_30px_rgba(23,63,56,0.08)] ring-1 ring-[#e5e9e7] transition duration-200 hover:-translate-y-1 hover:shadow-[0_18px_40px_rgba(23,63,56,0.14)] focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-3"
-      style={{ outlineColor: "var(--sky)", boxShadow: featured ? "0 0 0 2px var(--sky), 0 16px 36px rgba(23,63,56,0.10)" : undefined }}
+      className="group flex min-h-0 flex-col overflow-hidden rounded-[1.6rem] bg-white transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_14px_30px_rgba(30,92,58,0.18)]"
+      style={{
+        cursor: "pointer",
+        border: "2px solid var(--sky-light)",
+        boxShadow: "0 5px 16px rgba(30,92,58,0.10)",
+      }}
       role="button"
       tabIndex={0}
       aria-label={`Open ${title}`}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
     >
-      <div className="relative aspect-[16/10] overflow-hidden" style={{ background: "var(--grey-light)" }}>
+      {/* Image */}
+      <div
+        className="relative h-[clamp(100px,14vh,150px)] flex-shrink-0 overflow-hidden"
+        style={{ background: "var(--grey-light)" }}
+      >
         <img
           src={thumbnail ?? image}
-          alt=""
-          className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]"
+          alt={title}
+          className="h-full w-full object-cover object-center transition-transform duration-400 group-hover:scale-105"
+          style={{ filter: "none" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#173F38]/55 via-transparent to-transparent" />
-        <span className="absolute left-3 top-3 rounded-full bg-[#173F38]/88 px-3 py-1 text-xs font-semibold tracking-wide text-white backdrop-blur-sm">
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(20,62,39,0.70) 0%, rgba(20,62,39,0.08) 58%, transparent 100%)" }} />
+
+        <span
+          className="absolute bottom-2 left-2 rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-white md:text-sm"
+          style={{ background: "rgba(30,92,58,0.90)", backdropFilter: "blur(4px)" }}
+        >
           Schoolplaat {String(id).padStart(2, "0")}
         </span>
-        <span
-          className="absolute bottom-3 right-3 rounded-full px-3 py-1 text-xs font-bold"
+
+        {/* Emoji in corner */}
+        <div
+          className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full text-xl md:h-11 md:w-11 md:text-2xl"
+          style={{ background: "rgba(255,255,255,0.94)", boxShadow: "0 3px 10px rgba(0,0,0,0.18)" }}
+        >
+          {emoji}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex min-h-0 flex-1 flex-col gap-1 px-3 pb-3 pt-2.5 md:px-4 md:pb-3.5 md:pt-3">
+        <h3
+          className="text-base font-black leading-snug md:text-xl"
           style={{
-            background: answered === total ? "var(--forest-light)" : "var(--sand-light)",
-            color: answered === total ? "white" : "var(--forest)",
+            color: "var(--charcoal)",
+            fontFamily: "Nunito, sans-serif",
           }}
         >
-          {status}
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div>
-          <h3 className="text-xl leading-snug" style={{ color: "var(--forest)" }}>
-            {title}
-          </h3>
-          <p className="mt-1.5 text-sm leading-relaxed" style={{ color: "var(--charcoal-mid)" }}>
-            {desc}
-          </p>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-3">
-          <div aria-label={`${answered} van ${total} vragen ingevuld`}>
-            <div className="mb-1.5 flex items-center justify-between text-xs font-semibold">
-              <span style={{ color: "var(--muted)" }}>Quizvoortgang</span>
-              <span style={{ color: "var(--forest)" }}>{answered}/{total}</span>
-            </div>
-            <div className="h-1.5 overflow-hidden rounded-full" style={{ background: "var(--grey-light)" }}>
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${progressPercentage}%`,
-                  background: answered === total ? "var(--forest-mid)" : "var(--sky)",
-                }}
-              />
-            </div>
+          {title}
+        </h3>
+        <div className="mt-1 flex flex-col gap-1" aria-label={`${answered} van ${total} vragen ingevuld`}>
+          <div className="flex items-center justify-between text-xs font-black md:text-sm">
+            <span style={{ color: "var(--charcoal-mid)" }}>Quizvoortgang</span>
+            <span style={{ color: answered === total ? "var(--forest)" : "var(--sky-dark)" }}>
+              {answered}/{total}
+            </span>
           </div>
-          <button
-            className="btn btn-primary w-full py-3 text-sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              onOpen();
-            }}
-          >
-            Open schoolplaat
-            <span aria-hidden="true">→</span>
-          </button>
+          <div className="h-2 overflow-hidden rounded-full" style={{ background: "var(--grey-light)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${progressPercentage}%`,
+                background: answered === total
+                  ? "var(--forest-light)"
+                  : "linear-gradient(90deg, var(--sky), var(--forest-light))",
+              }}
+            />
+          </div>
         </div>
+        <button
+          className="btn btn-primary mt-auto w-full py-2.5 text-sm md:text-base"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpen();
+          }}
+        >
+          Open schoolplaat <span aria-hidden="true">→</span>
+        </button>
       </div>
     </article>
-  );
-}
-
-function LandscapeMark() {
-  return (
-    <svg viewBox="0 0 320 180" className="mx-auto h-36 w-full max-w-sm md:h-44" aria-hidden="true">
-      <rect width="320" height="180" rx="18" fill="#E7F3F1" />
-      <circle cx="248" cy="42" r="16" fill="#E8C56B" />
-      <path d="M0 98c36 10 62-8 98-6 34 2 48 22 86 18 40-4 58-24 136-8v78H0V98z" fill="#C9A27A" />
-      <path d="M0 118c42-20 74-8 112-22 36-14 58 4 96-2 34-6 58 2 112-16v102H0V118z" fill="#286B5F" />
-      <path d="M0 146c50-14 84 2 126-10 36-10 62 8 104 0 24-4 52-2 90-12v56H0v-34z" fill="#173F38" />
-      <path d="M38 132 54 78l16 54H38z" fill="#145248" />
-      <path d="M52 134 72 62l20 72H52z" fill="#0F3F38" />
-      <path d="M78 136 96 88l18 48H78z" fill="#1E5C4E" />
-      <rect x="68" y="132" width="5" height="18" rx="1" fill="#6B4A2B" />
-      <rect x="92" y="134" width="4" height="16" rx="1" fill="#6B4A2B" />
-      <path d="M196 124h34l-4 8H200l-4-8z" fill="#8C5A32" />
-      <path d="M200 132h26v16h-26z" fill="#F6F1E7" />
-      <path d="M196 132h34l-17-14-17 14z" fill="#A66B18" />
-      <rect x="210" y="138" width="6" height="10" fill="#173F38" />
-    </svg>
   );
 }
