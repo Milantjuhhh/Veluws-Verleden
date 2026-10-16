@@ -13,7 +13,7 @@ export default function HomePage({ onSelectPrint, quizProgress, onResetQuestions
     <div className="flex h-full flex-col overflow-y-auto md:overflow-hidden" style={{ background: "linear-gradient(180deg, #fffdf8 0%, var(--sand-light) 100%)" }}>
 
       {/* ── Grid section ────────────────────────────────── */}
-      <main className="mx-auto flex min-h-0 w-full max-w-[1580px] flex-1 flex-col px-3 py-3 md:px-5 md:py-4">
+      <main className="mx-auto flex min-h-0 w-full max-w-[1500px] flex-1 flex-col px-3 py-3 md:px-5 md:py-4">
         <div className="mb-3 flex-shrink-0 text-center">
           <h2
             className="mb-1 text-3xl md:text-4xl"
@@ -76,7 +76,7 @@ function PrintCard({ print, answered, onOpen }: CardProps) {
     >
       {/* Image */}
       <div
-        className="relative h-[clamp(100px,14vh,150px)] flex-shrink-0 overflow-hidden"
+        className="relative h-[clamp(96px,13vh,140px)] flex-shrink-0 overflow-hidden"
         style={{ background: "var(--grey-light)" }}
       >
         <img
@@ -96,7 +96,7 @@ function PrintCard({ print, answered, onOpen }: CardProps) {
 
         {/* Emoji in corner */}
         <div
-          className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full text-xl md:h-11 md:w-11 md:text-2xl"
+          className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full text-xl md:h-10 md:w-10 md:text-2xl"
           style={{ background: "rgba(255,255,255,0.94)", boxShadow: "0 3px 10px rgba(0,0,0,0.18)" }}
         >
           {emoji}
@@ -106,7 +106,7 @@ function PrintCard({ print, answered, onOpen }: CardProps) {
       {/* Body */}
       <div className="flex min-h-0 flex-1 flex-col gap-1 px-3 pb-3 pt-2.5 md:px-4 md:pb-3.5 md:pt-3">
         <h3
-          className="text-base font-black leading-snug md:text-xl"
+          className="text-base font-black leading-snug md:text-lg"
           style={{
             color: "var(--charcoal)",
             fontFamily: "Nunito, sans-serif",
